@@ -1,0 +1,2 @@
+import {useApp} from '../store.js';import {Tabs} from '../components/ui.jsx';
+export default function Profile(){const{user,setUser,bookings}=useApp();return<main className="page"><h1 className="h1">Perfil</h1><div className="host"><div className="av">{user.name[0]}</div><div><b>{user.name}</b><small>{user.email}</small></div></div><p className="hint">{bookings.length} reserva(s) no histórico.</p><button className="btn ghost" onClick={()=>setUser(null)}>Sair da conta</button><Tabs/></main>}

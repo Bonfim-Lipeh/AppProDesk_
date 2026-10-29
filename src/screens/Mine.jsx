@@ -1,0 +1,10 @@
+import {useState} from 'react';import {useApp,statusOf} from '../store.js';import {getSpace,brl} from '../services/api.js';import {Tabs} from '../components/ui.jsx';import {ics} from './Confirm.jsx';
+const L={ativa:'Ativas',['concluída']:'Concluídas',cancelada:'Canceladas'};
+export default function Mine(){const{bookings,cancel,go}=useApp();const[tab,setTab]=useState('ativa');const[ask,setAsk]=useState(null);
+ const list=bookings.filter(b=>statusOf(b)===tab);
+ return<main className="page"><h1 className="h1">Minhas reservas</h1><div className="seg">{Object.entries(L).map(([k,l])=><button key={k} className={tab===k?'on':''} onClick={()=>setTab(k)}>{l} ({bookings.filter(b=>statusOf(b)===k).length})</button>)}</div>
+ {!list.length&&<div className="empty"><p>Nenhuma reserva {L[tab].toLowerCase().slice(0,-1)==='ativ'?'ativa':L[tab].toLowerCase()} por aqui.</p>{tab==='ativa'&&<button className="btn" onClick={()=>go('explore')}>Explorar espaços</button>}</div>}
+ {list.map(b=>{const s=getSpace(b.spaceId),st=statusOf(b),free=new Date(`${b.date}T${String(b.start).padStart(2,'0')}:00`)-Date.now()>864e5;
+ return<div className="card col" key={b.id}><div className="rowb"><b>{s.name}</b><span className={'badge '+st}>{st}</span></div><small>{new Date(b.date+'T12:00').toLocaleDateString('pt-BR')} · {b.start}:00–{b.end}:00 · {b.id}</small><small>{s.address}</small>
+ <div className="rowb"><strong>{brl(b.total)}</strong><div>{st==='ativa'&&<><button className="pill" onClick={()=>ics(b,s)}>Calendário</button><button className="pill red" onClick={()=>setAsk(b.id)}>Cancelar</button></>}<button className="pill" onClick={()=>go('detail',{spaceId:s.id})}>{st==='ativa'?'Detalhes':'Reservar de novo'}</button></div></div>
+ {ask===b.id&&<div className="alert">{free?'Cancelamento gratuito: você recebe o reembolso integral.':'Faltam menos de 24 h: não há reembolso.'}<div><button className="pill red" onClick={()=>{cancel(b.id);setAsk(null);setTab('cancelada')}}>Confirmar cancelamento</button><button className="pill" onClick={()=>setAsk(null)}>Manter</button></div></div>}</div>})}<Tabs/></main>}
